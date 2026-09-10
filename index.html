@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CommentRank — Official Meta Comments Leaderboard & Giveaway</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Header / Navigation -->
+  <header class="navbar">
+    <div class="nav-container">
+      <div class="brand">
+        <span class="brand-icon">⚡</span>
+        <span class="brand-name">CommentRank</span>
+      </div>
+
+      <nav class="nav-links">
+        <a href="#dashboard" class="nav-item active" data-i18n="nav_dashboard">Dashboard</a>
+        <a href="#history" class="nav-item" id="navHistoryBtn" data-i18n="nav_history">History</a>
+        <a href="#settings" class="nav-item" data-i18n="nav_settings">Settings</a>
+      </nav>
+
+      <div class="nav-actions">
+        <!-- Language Switcher -->
+        <button id="langToggle" class="lang-btn" aria-label="Toggle Language">
+          <span id="langLabel">کوردی</span>
+        </button>
+
+        <!-- Auth Status Indicator -->
+        <div id="authContainer" class="auth-box">
+          <button id="connectFbBtn" class="btn btn-facebook">
+            <span class="fb-icon">f</span>
+            <span data-i18n="btn_connect_fb">Connect Facebook</span>
+          </button>
+          <div id="userProfile" class="user-profile hidden">
+            <img id="userAvatar" src="" alt="Avatar" class="avatar-small">
+            <span id="userName" class="user-name">Admin</span>
+            <button id="logoutBtn" class="logout-btn" title="Logout">✕</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-wrapper">
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="hero-content">
+        <div class="badge-tag">
+          <span class="pulse-dot"></span>
+          <span data-i18n="tag_official_meta">Official Meta Graph API Integration</span>
+        </div>
+        <h1 class="hero-title" data-i18n="hero_title">Count Facebook Comments Instantly</h1>
+        <p class="hero-subtitle" data-i18n="hero_subtitle">Paste a Facebook post link and discover who commented the most with verified analytics.</p>
+        
+        <!-- Post Input Card -->
+        <div class="search-card glass-panel">
+          <div class="input-group">
+            <span class="input-icon">🔗</span>
+            <input type="url" id="postUrlInput" placeholder="https://www.facebook.com/.../posts/..." autocomplete="off">
+            <button id="analyzeBtn" class="btn btn-primary">
+              <span data-i18n="btn_analyze">Analyze Comments</span>
+            </button>
+          </div>
+
+          <div class="input-footer">
+            <label class="demo-toggle-label">
+              <input type="checkbox" id="demoModeToggle">
+              <span class="toggle-slider"></span>
+              <span class="demo-text" data-i18n="label_demo_mode">Demo Mode (Test without logging in)</span>
+            </label>
+            <div id="connectionIndicator" class="conn-status not-connected">
+              <span class="status-indicator"></span>
+              <span id="connStatusText" data-i18n="status_not_connected">Facebook Not Connected</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Progress Indicator (During Fetching) -->
+    <div id="loadingProgress" class="progress-section hidden">
+      <div class="glass-panel progress-card">
+        <div class="spinner"></div>
+        <h4 id="progressStatusText" data-i18n="prog_connecting">Connecting to Meta Graph API...</h4>
+        <div class="progress-bar-container">
+          <div id="progressBarFill" class="progress-bar-fill"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tie Warning Card -->
+    <div id="tieAlertCard" class="glass-panel alert-card hidden">
+      <div class="alert-icon">⚠️</div>
+      <div class="alert-info">
+        <h4 data-i18n="tie_title">Multiple users are tied for first place!</h4>
+        <p id="tieDetailText">Ahmad and Sara both have the same highest number of comments.</p>
+      </div>
+      <button id="tieBreakBtn" class="btn btn-secondary" data-i18n="btn_tie_break">Random Tie Breaker</button>
+    </div>
+
+    <!-- Winner Showcase Card -->
+    <div id="winnerCard" class="glass-panel winner-showcase hidden">
+      <div class="confetti-backdrop"></div>
+      <div class="trophy-badge">🏆 <span data-i18n="winner_badge">WINNER</span></div>
+      <h2 id="winnerName" class="winner-username">Ahmad</h2>
+      <p id="winnerCommentsCount" class="winner-count">47 Comments</p>
+      
+      <div class="winner-actions">
+        <button id="pickAnotherWinnerBtn" class="btn btn-secondary" data-i18n="btn_pick_another">Pick Another Winner</button>
+        <button id="winnerConfigBtn" class="btn btn-glass" data-i18n="btn_giveaway_settings">Giveaway Options</button>
+      </div>
+    </div>
+
+    <!-- Analytics Stats Overview -->
+    <section id="statsSection" class="stats-grid hidden">
+      <div class="glass-panel stat-card">
+        <span class="stat-label" data-i18n="stat_total_comments">Total Comments</span>
+        <h3 id="statTotalComments" class="stat-value">0</h3>
+        <span class="stat-sub">100% Retrieved</span>
+      </div>
+      <div class="glass-panel stat-card">
+        <span class="stat-label" data-i18n="stat_unique_users">Unique Commenters</span>
+        <h3 id="statUniqueUsers" class="stat-value">0</h3>
+        <span class="stat-sub">Distinct Accounts</span>
+      </div>
+      <div class="glass-panel stat-card">
+        <span class="stat-label" data-i18n="stat_top_commenter">Top Commenter</span>
+        <h3 id="statTopCommenter" class="stat-value text-gold">—</h3>
+        <span id="statTopCount" class="stat-sub">0 Comments</span>
+      </div>
+      <div class="glass-panel stat-card">
+        <span class="stat-label" data-i18n="stat_avg_comments">Average Comments/User</span>
+        <h3 id="statAvgComments" class="stat-value">0.0</h3>
+        <span class="stat-sub">Engagement Depth</span>
+      </div>
+    </section>
+
+    <!-- Top 3 Podium Cards -->
+    <section id="podiumSection" class="podium-grid hidden">
+      <!-- 2nd Place -->
+      <div class="glass-panel podium-card second">
+        <span class="podium-medal">🥈</span>
+        <div class="podium-avatar">2</div>
+        <h4 id="podium2Name" class="podium-name">—</h4>
+        <span id="podium2Count" class="podium-count">0 comments</span>
+      </div>
+      <!-- 1st Place -->
+      <div class="glass-panel podium-card first">
+        <span class="podium-medal">🥇</span>
+        <div class="podium-avatar gold">1</div>
+        <h4 id="podium1Name" class="podium-name">—</h4>
+        <span id="podium1Count" class="podium-count">0 comments</span>
+      </div>
+      <!-- 3rd Place -->
+      <div class="glass-panel podium-card third">
+        <span class="podium-medal">🥉</span>
+        <div class="podium-avatar">3</div>
+        <h4 id="podium3Name" class="podium-name">—</h4>
+        <span id="podium3Count" class="podium-count">0 comments</span>
+      </div>
+    </section>
+
+    <!-- Chart Visualization Section -->
+    <section id="chartSection" class="glass-panel chart-container hidden">
+      <div class="chart-header">
+        <h4 data-i18n="chart_title">Top 10 Commenters Distribution</h4>
+      </div>
+      <div id="barChart" class="bar-chart-visual"></div>
+    </section>
+
+    <!-- Leaderboard & Controls -->
+    <section id="leaderboardSection" class="leaderboard-wrapper hidden">
+      <div class="leaderboard-controls glass-panel">
+        <div class="filter-group">
+          <input type="text" id="searchUserInput" placeholder="Search commenter..." data-i18n-ph="ph_search">
+          
+          <select id="sortSelect" aria-label="Sort">
+            <option value="most" data-i18n="sort_most">Most Comments</option>
+            <option value="least" data-i18n="sort_least">Least Comments</option>
+            <option value="name_asc" data-i18n="sort_name_asc">Name (A-Z)</option>
+            <option value="name_desc" data-i18n="sort_name_desc">Name (Z-A)</option>
+          </select>
+
+          <select id="limitSelect" aria-label="Limit">
+            <option value="10">Top 10</option>
+            <option value="25">Top 25</option>
+            <option value="50">Top 50</option>
+            <option value="all" data-i18n="filter_all">All</option>
+          </select>
+        </div>
+
+        <div class="export-group">
+          <button id="exportCsvBtn" class="btn btn-sm btn-glass">CSV</button>
+          <button id="exportJsonBtn" class="btn btn-sm btn-glass">JSON</button>
+          <button id="printBtn" class="btn btn-sm btn-glass" data-i18n="btn_print">Print</button>
+        </div>
+      </div>
+
+      <div class="table-responsive glass-panel">
+        <table class="data-table" id="leaderboardTable">
+          <thead>
+            <tr>
+              <th data-i18n="th_rank">Rank</th>
+              <th data-i18n="th_name">Commenter</th>
+              <th data-i18n="th_comments">Comments</th>
+              <th data-i18n="th_percentage">Percentage</th>
+              <th data-i18n="th_last_active">Last Activity</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboardBody">
+            <!-- Populated Dynamically -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Giveaway Modal -->
+    <div id="giveawayModal" class="modal-backdrop hidden">
+      <div class="modal-box glass-panel">
+        <div class="modal-header">
+          <h3 data-i18n="modal_giveaway_title">Giveaway Winner Selector</h3>
+          <button id="closeModalBtn" class="close-btn">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label data-i18n="label_selection_method">Selection Method</label>
+            <select id="giveawayModeSelect">
+              <option value="most_comments" data-i18n="opt_most_comments">Highest Number of Comments (#1)</option>
+              <option value="random" data-i18n="opt_random">Random Winner</option>
+            </select>
+          </div>
+          <div class="form-group" id="weightingOption">
+            <label class="checkbox-label">
+              <input type="checkbox" id="weightedCheckbox">
+              <span data-i18n="label_weighted">Weighted Chance (More comments = higher probability)</span>
+            </label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="executeGiveawayBtn" class="btn btn-primary" data-i18n="btn_roll_winner">Draw Winner 🎉</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast hidden"></div>
+
+  <!-- Client-side Scripts -->
+  <script src="js/i18n.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
